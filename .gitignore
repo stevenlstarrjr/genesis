@@ -1,0 +1,8 @@
+/build/
+/out/
+/.cache/
+/.vs/
+/.vscode/
+/third_party/
+*.user
+*.suo
