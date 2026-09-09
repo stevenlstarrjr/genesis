@@ -16,8 +16,17 @@ set(SDL_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(SDL_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
 add_subdirectory(thirdparty/SDL EXCLUDE_FROM_ALL)
 
+# PocketPy is the embedded scripting runtime used by engine demos and examples.
+set(PK_BUILD_SHARED_LIB OFF CACHE BOOL "" FORCE)
+set(PK_BUILD_STATIC_LIB ON CACHE BOOL "" FORCE)
+set(PK_ENABLE_OS ON CACHE BOOL "" FORCE)
+add_subdirectory(thirdparty/pocketpy EXCLUDE_FROM_ALL)
+
 add_executable(genesis src/main.cpp)
-target_link_libraries(genesis PRIVATE SDL3::SDL3)
+target_link_libraries(genesis PRIVATE SDL3::SDL3 pocketpy)
+target_compile_definitions(genesis PRIVATE
+    GENESIS_DEMO_DIR="${CMAKE_CURRENT_SOURCE_DIR}/demos"
+)
 
 if(MSVC)
     target_compile_options(genesis PRIVATE /W4 /permissive-)
