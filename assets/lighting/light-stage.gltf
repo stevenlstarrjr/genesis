@@ -1,0 +1,44 @@
+{
+  "asset": { "version": "2.0", "generator": "Genesis light-pattern stage" },
+  "scene": 0,
+  "scenes": [{ "nodes": [0] }],
+  "nodes": [{ "mesh": 0, "name": "Ground and Wall" }],
+  "meshes": [{
+    "name": "Ground and Wall",
+    "primitives": [{
+      "attributes": { "POSITION": 0, "NORMAL": 1 },
+      "indices": 2,
+      "material": 0,
+      "mode": 4
+    }]
+  }],
+  "materials": [{
+    "name": "Neutral rough stage",
+    "pbrMetallicRoughness": {
+      "baseColorFactor": [0.42, 0.42, 0.42, 1.0],
+      "metallicFactor": 0.0,
+      "roughnessFactor": 0.72
+    }
+  }],
+  "buffers": [{
+    "byteLength": 216,
+    "uri": "data:application/octet-stream;base64,AABAwQAAAAAAAMDAAABAwQAAAAAAAABBAABAQQAAAAAAAABBAABAQQAAAAAAAMDAAABAwQAAAAAAAMDAAABAQQAAAAAAAMDAAABAQQAAIEEAAMDAAABAwQAAIEEAAMDAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAABAAIAAAACAAMABAAFAAYABAAGAAcA"
+  }],
+  "bufferViews": [
+    { "buffer": 0, "byteOffset": 0, "byteLength": 96, "target": 34962 },
+    { "buffer": 0, "byteOffset": 96, "byteLength": 96, "target": 34962 },
+    { "buffer": 0, "byteOffset": 192, "byteLength": 24, "target": 34963 }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 8,
+      "type": "VEC3",
+      "min": [-12.0, 0.0, -6.0],
+      "max": [12.0, 10.0, 8.0]
+    },
+    { "bufferView": 1, "componentType": 5126, "count": 8, "type": "VEC3" },
+    { "bufferView": 2, "componentType": 5123, "count": 12, "type": "SCALAR" }
+  ]
+}

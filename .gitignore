@@ -1,8 +1,15 @@
 /build/
 /out/
+/artifacts/
 /.cache/
 /.vs/
 /.vscode/
+/assets/atmosphere/bruneton/spectral_cache/
 /third_party/
+__pycache__/
+*.py[cod]
+*.log
 *.user
 *.suo
+.genesis/
+/*.obj

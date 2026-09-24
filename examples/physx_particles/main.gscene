@@ -1,0 +1,60 @@
+{
+  "format": 1,
+  "name": "PhysX Particles",
+  "script": "environment.py",
+  "editor_camera": {
+    "position": [9, 8, 13],
+    "target": [0, 2, 0],
+    "orbit_pivot": [0, 2, 0],
+    "fov": 60
+  },
+  "entities": [
+    {
+      "name": "Collision Platform",
+      "model": "../../assets/glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb",
+      "particle_collider": {"moving": true},
+      "position": [-3, 1.25, 0],
+      "scale": [3, 0.35, 3]
+    },
+    {
+      "name": "Granular Platform",
+      "model": "../../assets/glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb",
+      "position": [5, 1.25, 0],
+      "scale": [2, 0.35, 2]
+    },
+    {
+      "name": "Fluid",
+      "position": [-3, 3.5, 0],
+      "particle_system": {
+        "mode": "fluid", "dimensions": [10, 7, 10],
+        "spacing": 0.15, "mass": 0.02, "viscosity": 0.01, "cohesion": 0.05
+      }
+    },
+    {
+      "name": "Granular",
+      "position": [5, 1.8, 0],
+      "particle_system": {
+        "mode": "granular", "dimensions": [6, 4, 6],
+        "spacing": 0.12, "mass": 0.03, "friction": 0.8,
+        "damping": 0.18
+      }
+    },
+    {
+      "name": "Cloth",
+      "position": [0, 5, 0],
+      "particle_system": {
+        "mode": "cloth", "dimensions": [20, 1, 20],
+        "spacing": 0.15, "mass": 0.02, "stiffness": 1000, "pin_edge": "left"
+      }
+    },
+    {
+      "name": "Explosion",
+      "position": [0, 3.65, 0],
+      "particle_system": {
+        "mode": "explosion", "dimensions": [8, 8, 8], "spacing": 0.13,
+        "mass": 0.02, "burst_speed": 8, "blast_radius": 3,
+        "blast_impulse": 8, "effect_duration": 2.5
+      }
+    }
+  ]
+}

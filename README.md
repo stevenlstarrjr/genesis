@@ -1,52 +1,109 @@
 # Genesis
 
-An NVIDIA-focused path-traced renderer based on RTXPT, with SDL3 retained as
-the engine platform layer.
+Browser/WebAssembly build instructions: [WebGPU editor](docs/web-build.md).
+
+Genesis is a Python-driven real-time engine with a bgfx/D3D11 raster PBR
+renderer. PocketPy is embedded for authoring demos, examples, and engine
+scripts.
 
 ## Dependencies
 
-- `thirdparty/SDL`: SDL3 source used by the engine shell.
-- `thirdparty/RTXPT`: NVIDIA RTXPT and its pinned recursive dependencies.
-- `thirdparty/pocketpy`: embedded Python runtime for demos, examples, and
-  engine scripting.
+- `thirdparty/entt`: vendored EnTT 3.16 gameplay ECS.
+- `thirdparty/pocketpy`: embedded Python runtime.
+- `thirdparty/SDL`: Genesis platform layer.
+- `thirdparty/bgfx`, `bimg`, and `bx`: real-time raster renderer.
+- `thirdparty/thorvg`: vector rendering for engine UI surfaces.
+- `thirdparty/yoga`: responsive engine UI layout.
+- `assets/glTF-Sample-Models`: Khronos glTF sample assets.
 
-Genesis demos and examples are authored in Python. Native C/C++ code provides
-the renderer, platform layer, and Python bindings; Python scripts assemble and
-drive the demonstrations.
-
-RTXPT currently uses its own Donut application shell. Integrating the RTXPT
-renderer with the SDL3 application lifecycle will be done after the unmodified
-renderer sample is validated.
-
-## Build the SDL3 shell
+Clone all dependencies with:
 
 ```powershell
-cmake -S . -B out/genesis
-cmake --build out/genesis --config Release --target genesis
-./out/genesis/Release/genesis.exe
+git submodule update --init --recursive
 ```
 
-## Build and run the RTXPT demo
+## Build
 
 ```powershell
-cmake -S thirdparty/RTXPT -B build/rtxpt -A x64
-cmake --build build/rtxpt --config Release --target Rtxpt -j 8
-./thirdparty/RTXPT/bin/Rtxpt.exe
+cmake -S . -B build/release/microsoft/.cmake
+cmake --build build/release/microsoft/.cmake --config Release --target Genesis -j 8
 ```
 
-Run the executable with `thirdparty/RTXPT/bin` as its working directory so it
-can find the sibling `Assets` directory. RTXPT's default and most complete path
-uses DirectX 12; Vulkan can be enabled separately later.
+The Release executable is written to `build/release/microsoft/genesis.exe`.
+Generated CMake metadata remains in the platform's hidden `.cmake` directory.
+Debug builds use `build/debug/microsoft`; other targets select `apple`, `linux`,
+or `web` beneath the same Release/Debug level.
 
-## Material support
+## Projects, scenes, and Python
 
-RTXPT imports glTF 2.0 scenes and provides a path-traced BSDF material model.
-It supports textured PBR parameters, emissive geometry, alpha-tested surfaces,
-transmission, volumes, and nested dielectric materials. The material and BSDF
-shaders are intended to be extended for engine-specific shading models.
+Genesis accepts a project directory containing `genesis.project`, a `.gscene`
+file, or a Python script. The project settings designate a main scene, and the
+scene references its root and node Python scripts. With no target, Genesis
+opens a ThorVG/Yoga project launcher that also accepts dropped paths.
 
-## Python demo
+```powershell
+build/release/microsoft/genesis.exe examples/hello_project
+```
 
-The SDL3 shell initializes PocketPy and runs `demos/hello.py` during startup.
-This is the initial scripting smoke test; engine and renderer bindings will be
-added incrementally as the public scripting API takes shape.
+Run another script with `--script`, for example:
+
+```powershell
+build/release/microsoft/genesis.exe --script demos/clouds.py
+```
+
+See [docs/projects-and-scenes.md](docs/projects-and-scenes.md) for the project
+and scene formats.
+
+The launcher and HUD share the renderer-independent `genesis_ui` C++ library:
+retained widgets, Yoga flex layout, ThorVG drawing, pointer/keyboard input and
+DPI-aware surfaces. Editor controls include text/number fields, checkboxes,
+sliders, trees, tabs and scrollable inspectors. Run `genesis.exe --ui-workbench`
+to try the interactive editor-control workbench. See
+[docs/ui-toolkit.md](docs/ui-toolkit.md) for the API, tests and current scope.
+
+Capture a deterministic verification frame with:
+
+```powershell
+build/release/microsoft/genesis.exe --screenshot artifacts/screenshots/verification
+```
+
+Scripts can register named camera poses for broader regression coverage. The
+wall test also exposes AO and contact-shadow diagnostics:
+
+```powershell
+build/release/microsoft/genesis.exe --script demos/shadow_wall_regression.py --camera wall-upward --screenshot artifacts/screenshots/upward
+build/release/microsoft/genesis.exe --script demos/shadow_wall_regression.py --camera wall-surface --debug-view contact --screenshot artifacts/screenshots/contact
+```
+
+## Renderer
+
+The renderer currently includes glTF materials, GGX metallic/roughness PBR,
+GPU skeletal animation, Bruneton atmosphere, an HDR prefiltered sky cubemap,
+two-way blended box-projected local reflection probes stored in texture-array
+atlases with split-sum image-based lighting,
+script-authored point lights with GGX shading, finite-radius falloff, and
+distance/intensity-selected cubemap shadows,
+shadowed spot lights with smooth inner/outer cone falloff,
+LM-63 Type C IES photometric profiles and projected spotlight cookies,
+one-sided rectangular area lights with finite-emitter GGX response,
+volumetric fog and sun shafts, cascaded sun shadows, SSAO, contact shadows,
+HDR emissive materials with bounded direct-light sampling, soft-knee bloom,
+histogram auto exposure,
+AgX-style tone mapping, Low/Medium/High GPU quality
+presets, and per-pass GPU timing diagnostics.
+
+Controls and current renderer status are documented in [handoff.md](handoff.md).
+The public Python module is in `python/genesis/__init__.py`; see
+[docs/python-api.md](docs/python-api.md) for the scripting API.
+
+Renderer-neutral scene and light descriptions live in `src/RenderScene.*`.
+The active bgfx implementation lives under `src/backends/raster/`; the hybrid
+and path-tracer directories are intentionally empty extension points. Backend
+ownership rules are documented in `src/backends/README.md`.
+
+Run `demos/local_light_showcase.py` to compare point, spot, and rectangular area
+lights on a black-environment ground plane without sun or ambient illumination.
+The demo also enables optional emissive source meshes so point bulbs, spot
+lenses, and rectangular panels are visibly distinct and produce true bloom.
+Run `demos/emissive_bloom.py` to compare the 1x-16x glTF emissive-strength
+panels and their HDR bloom response without any scene lighting.

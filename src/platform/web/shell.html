@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Genesis — WebGPU Editor</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b101a;color:#dce5f5;font:14px system-ui,sans-serif}
+#canvas{display:block;width:100vw;height:calc(100vh - 32px);outline:none}
+#browser-tools{height:32px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:0 14px;background:#101725;border-bottom:1px solid #273349;font-size:12px}
+button,a{font:inherit;color:#dce5f5;background:none;border:0;cursor:pointer;text-decoration:none}button:hover,a:hover{color:#8ab8ff}#browser-tools span{color:#8594ac}
+#loading{position:absolute;inset:0;display:grid;place-content:center;background:#0b101a;gap:12px;text-align:center}
+#loading[hidden]{display:none}h1{font-size:28px;letter-spacing:.04em;margin:0}p{color:#9fadc2;margin:0;max-width:600px}
+#error{color:#ffb4a5;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<nav id="browser-tools"><span>WEBGPU / Browser-local project</span><button id="import">Import .glb</button><button id="export">Export scene</button><a id="edit" href="?" hidden>Return to editor</a><span id="file-status"></span></nav>
+<input id="files" type="file" accept=".glb" multiple hidden>
+<canvas id="canvas" tabindex="0" aria-label="Genesis scene editor and 3D viewport"></canvas>
+<section id="loading"><h1>GENESIS</h1><p id="status">Loading the WebGPU editor…</p><p id="error"></p></section>
+<script>
+const canvas=document.getElementById('canvas');
+canvas.addEventListener('contextmenu',event=>event.preventDefault());
+canvas.addEventListener('pointerdown',()=>canvas.focus());
+canvas.addEventListener('wheel',event=>event.preventDefault(),{passive:false});
+canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+function showFailure(message){document.getElementById('loading').hidden=false;document.getElementById('status').textContent='Genesis could not start';document.getElementById('error').textContent=String(message);}
+const playing=new URLSearchParams(location.search).has('play');
+var Module={canvas,arguments:playing?['--scene','/genesis/examples/editor_project/main.gscene']:['--editor'],imports:[],
+    print:console.log,printErr:console.error,
+    setStatus:text=>document.getElementById('status').textContent=text||'Starting renderer…',
+    onAbort:showFailure,
+    onExit:code=>{if(code)showFailure('Application exited with code '+code+'. See the browser console for details.');}
+};
+const scenePath='/genesis/examples/editor_project/main.gscene';
+function database(){return new Promise((resolve,reject)=>{
+    const request=indexedDB.open('genesis-web-editor',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('projects');
+    request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
+});}
+Module.restoreProject=async()=>{
+    const db=await database();
+    const project=await new Promise((resolve,reject)=>{const request=db.transaction('projects').objectStore('projects').get('starter');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});
+    db.close();FS.mkdirTree('/genesis/imports');
+    if(!project)return;
+    // Only our known virtual paths can be restored; never arbitrary OS paths.
+    for(const file of project.files||[]){if(/^\/genesis\/imports\/[a-zA-Z0-9_.-]+\.glb$/i.test(file.path))FS.writeFile(file.path,file.data);}
+    if(typeof project.scene==='string')FS.writeFile(scenePath,project.scene);
+};
+Module.saveProject=async path=>{
+    const scene=FS.readFile(path,{encoding:'utf8'}),files=[];
+    // Save all imported models, including assets referenced by undo history.
+    for(const name of FS.readdir('/genesis/imports'))if(name.toLowerCase().endsWith('.glb')){const path='/genesis/imports/'+name;files.push({path,data:FS.readFile(path)});}
+    const db=await database();
+    try{await new Promise((resolve,reject)=>{const transaction=db.transaction('projects','readwrite');transaction.objectStore('projects').put({scene,files},'starter');transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error||new Error('Save aborted'));});}finally{db.close();}
+    document.getElementById('file-status').textContent='Saved in this browser';
+};
+Module.downloadScene=path=>{
+    const url=URL.createObjectURL(new Blob([FS.readFile(path)],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download='main.gscene';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+async function importModels(files){
+    if(!Module.genesisFrames)return;
+    for(const file of Array.from(files)){
+        if(!file.name.toLowerCase().endsWith('.glb')){document.getElementById('file-status').textContent='Import a self-contained .glb model';continue;}
+        if(file.size>64*1024*1024){document.getElementById('file-status').textContent='Model exceeds the 64 MB browser import limit';continue;}
+        const data=new Uint8Array(await file.arrayBuffer());
+        if(data.length<12||new DataView(data.buffer).getUint32(0,true)!==0x46546c67){document.getElementById('file-status').textContent='Invalid GLB file';continue;}
+        FS.mkdirTree('/genesis/imports');
+        const name=crypto.randomUUID()+'-'+file.name.replace(/[^a-zA-Z0-9_.-]/g,'_');
+        const path='/genesis/imports/'+name;FS.writeFile(path,data);Module.imports.push(path);
+    }
+}
+document.getElementById('import').onclick=()=>document.getElementById('files').click();
+document.getElementById('files').onchange=event=>{importModels(event.target.files);event.target.value='';};
+document.getElementById('export').onclick=()=>{if(Module.genesisFrames)Module.exportRequested=true;};
+canvas.addEventListener('dragover',event=>event.preventDefault());
+canvas.addEventListener('drop',event=>{event.preventDefault();event.stopImmediatePropagation();importModels(event.dataTransfer.files);},true);
+window.addEventListener('beforeunload',event=>{if(Module.sceneDirty){event.preventDefault();event.returnValue='';}});
+if(playing){document.getElementById('edit').hidden=false;document.getElementById('import').hidden=true;document.getElementById('export').hidden=true;}
+if(!navigator.gpu) showFailure('WebGPU is unavailable. Open this page in a WebGPU-enabled browser on localhost or HTTPS.');
+else if(typeof WebAssembly.Suspending!=='function') showFailure('This build needs WebAssembly JSPI. Please use a current desktop Chrome or Edge browser.');
+window.addEventListener('error',event=>showFailure(event.message));
+window.addEventListener('unhandledrejection',event=>showFailure(event.reason));
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

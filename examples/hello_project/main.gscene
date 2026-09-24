@@ -1,0 +1,11 @@
+{
+  "format": 1,
+  "name": "Main",
+  "script": "main.py",
+  "nodes": [
+    {
+      "name": "Helmet",
+      "script": "helmet.py"
+    }
+  ]
+}

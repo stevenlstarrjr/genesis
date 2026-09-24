@@ -1,0 +1,62 @@
+diff --git a/physx/source/compiler/cmakegpu/CMakeLists.txt b/physx/source/compiler/cmakegpu/CMakeLists.txt
+index 511e4ea..08a067d 100644
+--- a/physx/source/compiler/cmakegpu/CMakeLists.txt
++++ b/physx/source/compiler/cmakegpu/CMakeLists.txt
+@@ -84,7 +84,9 @@ SET(SOURCE_DISTRO_FILE_LIST "")
+ # No need to set --generate-code=arch=compute_75,code=[compute_75,sm_75]
+ # since that's the default set in: compiler\internal\CMakeLists.txt (using CMAKE_CUDA_ARCHITECTURES)
+ # see policy CMP0104
+-IF(PX_GENERATE_GPU_REDUCED_ARCHITECTURES)
++IF(PX_CUDA_SM_ARCH)
++	GENERATE_ARCH_CODE_LIST(SASS "${PX_CUDA_SM_ARCH}" PTX "${PX_CUDA_SM_ARCH}")
++ELSEIF(PX_GENERATE_GPU_REDUCED_ARCHITECTURES)
+ 	GENERATE_ARCH_CODE_LIST(SASS "80,86,89,90,100,120" PTX "120")
+ ELSE()
+ 	# Volta is the minimum compute arch required because NGC supports V100
+diff --git a/physx/source/cudamanager/src/CudaContextManager.cpp b/physx/source/cudamanager/src/CudaContextManager.cpp
+index 263a7f2..204f4e7 100644
+--- a/physx/source/cudamanager/src/CudaContextManager.cpp
++++ b/physx/source/cudamanager/src/CudaContextManager.cpp
+@@ -575,7 +575,11 @@ CudaCtxMgr::CudaCtxMgr(const PxCudaContextManagerDesc& desc, PxErrorCallback& er
+ 				return;
+ 			}
+ 			
++			#if CUDA_VERSION >= 13000
++			status = cuCtxCreate(&mCtx, nullptr, (unsigned int)flags, mDevHandle);
++			#else
+ 			status = cuCtxCreate(&mCtx, (unsigned int)flags, mDevHandle);
++			#endif
+ 			if (CUDA_SUCCESS != status)
+ 			{
+ 				const size_t bufferSize = 128;
+diff --git a/physx/source/cudamanager/src/CudaKernelWrangler.cpp b/physx/source/cudamanager/src/CudaKernelWrangler.cpp
+index 245d1d9..043884e 100644
+--- a/physx/source/cudamanager/src/CudaKernelWrangler.cpp
++++ b/physx/source/cudamanager/src/CudaKernelWrangler.cpp
+@@ -202,6 +202,19 @@ cudaError_t CUDARTAPI cudaLaunchKernel( const void* , dim3 , dim3 , void** , siz
+ 	return cudaSuccess;
+ }
+ 
++// CUDA 13 host stubs refer to these newer runtime entry points. PhysX
++// launches through the driver API, so the generated host stubs are unused.
++extern "C" cudaError_t CUDARTAPI __cudaGetKernel(cudaKernel_t* kernel, const void* function)
++{
++	*kernel = reinterpret_cast<cudaKernel_t>(const_cast<void*>(function));
++	return cudaSuccess;
++}
++
++extern "C" cudaError_t CUDARTAPI __cudaLaunchKernel(cudaKernel_t, dim3, dim3, void**, size_t, cudaStream_t)
++{
++	return cudaSuccess;
++}
++
+ extern "C"
+ cudaError_t CUDARTAPI cudaSetupArgument(const void*, size_t, size_t)
+ {
+@@ -229,4 +242,4 @@ cudaError_t CUDARTAPI __cudaPopCallConfiguration(
+   void         *)
+ {
+ 	return cudaSuccess;
+-}
+\ No newline at end of file
++}

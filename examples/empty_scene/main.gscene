@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "name": "Empty Scene",
+  "script": "environment.py",
+  "editor_camera": {
+    "position": [4, 3, 5],
+    "target": [0, 0, 0],
+    "orbit_pivot": [0, 0, 0],
+    "fov": 60
+  },
+  "entities": []
+}

@@ -1,9 +1,6 @@
 [submodule "thirdparty/SDL"]
 	path = thirdparty/SDL
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "thirdparty/RTXPT"]
-	path = thirdparty/RTXPT
-	url = https://github.com/NVIDIA-RTX/RTXPT.git
 [submodule "assets/glTF-Sample-Models"]
 	path = assets/glTF-Sample-Models
 	url = https://github.com/KhronosGroup/glTF-Sample-Models.git
@@ -11,3 +8,9 @@
 [submodule "thirdparty/pocketpy"]
 	path = thirdparty/pocketpy
 	url = https://github.com/pocketpy/pocketpy.git
+[submodule "thirdparty/yoga"]
+	path = thirdparty/yoga
+	url = https://github.com/facebook/yoga.git
+[submodule "thirdparty/thorvg"]
+	path = thirdparty/thorvg
+	url = https://github.com/thorvg/thorvg.git

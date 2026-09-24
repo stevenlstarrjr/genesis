@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "name": "Campfire",
+  "particle_system": {
+    "mode": "emitter",
+    "layers": [
+      {
+        "name": "Smoke",
+        "shape": "soft",
+        "count": 29,
+        "lifetime": 2.5,
+        "spawn_radius": 0.53,
+        "offset": [0, 0.8, 0],
+        "velocity": [0, 0.84, 0],
+        "radial_speed": 0.18,
+        "turbulence": 0.19,
+        "size": 0.11,
+        "size_growth": 0.25,
+        "start_color": [0.24, 0.24, 0.25, 0.27],
+        "end_color": [0.12, 0.12, 0.13, 0]
+      },
+      {
+        "name": "Flame",
+        "shape": "soft",
+        "count": 58,
+        "lifetime": 0.85,
+        "spawn_radius": 0.3,
+        "offset": [0, 0.05, 0],
+        "velocity": [0, 1.7, 0],
+        "radial_speed": -0.12,
+        "turbulence": 0.19,
+        "size": 0.13,
+        "size_growth": 0.05,
+        "fade_in": 0.125,
+        "start_color": [1, 0.75, 0.12, 0.8],
+        "end_color": [1, 0.48, 0.04, 0]
+      },
+      {
+        "name": "Sparks",
+        "shape": "spark",
+        "count": 9,
+        "lifetime": 1.35,
+        "spawn_radius": 0.38,
+        "offset": [0, 0.25, 0],
+        "velocity": [0, 1.6, 0],
+        "turbulence": 0.19,
+        "size": 0.032,
+        "start_color": [1, 0.85, 0.34, 0.95],
+        "end_color": [1, 0.32, 0.03, 0]
+      },
+      {
+        "name": "Glow",
+        "shape": "soft",
+        "count": 1,
+        "spawn_radius": 0,
+        "velocity": [0, 0, 0],
+        "turbulence": 0,
+        "size": 0.307,
+        "start_color": [1, 0.55, 0.08, 0.48],
+        "end_color": [1, 0.55, 0.08, 0.48]
+      }
+    ]
+  },
+  "light": {
+    "type": "point",
+    "color": [1.0, 0.38, 0.08],
+    "intensity": 32,
+    "range": 6,
+    "shadows": true
+  }
+}

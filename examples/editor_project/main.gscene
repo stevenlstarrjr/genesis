@@ -1,0 +1,102 @@
+{
+  "editor_camera" : 
+  {
+    "fov" : 60.0,
+    "orbit_pivot" : 
+    [
+      0.0,
+      0.95049762725830078,
+      0.0
+    ],
+    "position" : 
+    [
+      1.0071195363998413,
+      2.0052108764648438,
+      3.2272424697875977
+    ],
+    "target" : 
+    [
+      0.0,
+      0.95049762725830078,
+      0.0
+    ]
+  },
+  "entities" : 
+  [
+    {
+      "model" : "../../assets/glTF-Sample-Models/2.0/Box/glTF-Binary/Box.glb",
+      "name" : "Ground",
+      "position" : 
+      [
+        0.0,
+        -0.15000000596046448,
+        0.0
+      ],
+      "rotation" : 
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale" : 
+      [
+        12.0,
+        0.20000000298023224,
+        12.0
+      ],
+      "tags" : [],
+      "visible" : true
+    },
+    {
+      "model" : "../../assets/glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+      "name" : "Crate",
+      "position" : 
+      [
+        -2.4000000953674316,
+        0.64999997615814209,
+        0.0
+      ],
+      "rotation" : 
+      [
+        0.0,
+        25.0,
+        0.0
+      ],
+      "scale" : 
+      [
+        1.2999999523162842,
+        1.2999999523162842,
+        1.2999999523162842
+      ],
+      "tags" : [],
+      "visible" : true
+    },
+    {
+      "model" : "../../assets/glTF-Sample-Models/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb",
+      "name" : "Helmet",
+      "position" : 
+      [
+        0.5,
+        1.25,
+        0.0
+      ],
+      "rotation" : 
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale" : 
+      [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "tags" : [],
+      "visible" : true
+    }
+  ],
+  "format" : 1,
+  "name" : "Starter World",
+  "script" : "environment.py"
+}

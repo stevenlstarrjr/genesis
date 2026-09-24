@@ -1,0 +1,8 @@
+{
+  "format": 1,
+  "name": "Genesis Hello Project",
+  "application": {
+    "main_scene": "main.gscene"
+  }
+}
+
